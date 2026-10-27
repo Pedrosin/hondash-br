@@ -59,11 +59,14 @@ def tempo_transmissao(n_bytes: int, baud: int = BAUD) -> float:
 class Montador:
     """Remonta quadros a partir de bytes soltos, usando o byte de tamanho.
 
-    Byte que não pode iniciar um quadro (tamanho < 3 ou > máximo, ou checksum
-    que não fecha) é descartado e a busca recomeça no byte seguinte.
+    Byte que não pode iniciar um quadro (tipo fora de `tipos`, tamanho < 3 ou
+    > máximo, ou checksum que não fecha) é descartado e a busca recomeça no
+    byte seguinte. Filtrar o tipo corta a maior parte dos falsos quadros que
+    lixo + checksum de 8 bits deixariam passar.
     """
 
-    def __init__(self) -> None:
+    def __init__(self, tipos: frozenset[int] | None = None) -> None:
+        self.tipos = tipos
         self.buf = bytearray()
         self.meta: list = []  # um valor por byte do buffer (ex.: silêncio antes do byte)
         self.descartados = 0
@@ -78,7 +81,7 @@ class Montador:
         saida = []
         while len(self.buf) >= 2:
             n = self.buf[1]
-            if n < 3 or n > TAMANHO_MAX:
+            if (self.tipos and self.buf[0] not in self.tipos) or n < 3 or n > TAMANHO_MAX:
                 self._descartar()
                 continue
             if len(self.buf) < n:

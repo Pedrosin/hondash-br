@@ -54,7 +54,7 @@ class EcuVirtual:
         self.velocidade = velocidade
         self.estado = DORMINDO
         self.cont = Contadores()
-        self._montador = p.Montador()
+        self._montador = p.Montador(frozenset({p.TIPO_REQ, p.WAKE[0]}))
         self._linha_ocupada_ate = t0 - 10.0  # linha em repouso desde "sempre"
         self._silencio_antes_do_quadro = 0.0
         self._pulso_fim: float | None = None
