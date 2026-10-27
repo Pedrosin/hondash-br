@@ -1,0 +1,144 @@
+# Mapa PROVISÓRIO da ECU (Civic EH 93/94, Keihin K-line).
+#
+# TUDO aqui é HIPÓTESE: nenhum offset, fórmula, tamanho de tabela ou tempo foi
+# medido no carro. A fonte pública do protocolo não documenta o conteúdo das
+# tabelas. Quando sair o log real (FASE-0.md, passo 5), este é o ÚNICO arquivo
+# a trocar: emulador, ponte do painel e testes leem daqui.
+#
+# Conversão de cada sensor:
+#   linear  -> fisico = bruto * escala + soma
+#   inverso -> fisico = k / bruto     (bruto 0 => 0)
+# Inteiros de 2 bytes são big-endian (também HIPÓTESE).
+
+[tempo]
+status = "HIPOTESE"
+latencia_resposta_ms = 15     # silêncio da ECU entre o fim da requisição e a resposta
+sono_s = 2.0                  # sem requisição por esse tempo, a ECU volta a dormir
+pulso_baixo_ms = 70           # wake-up: nível baixo (fonte pública)
+pulso_alto_ms = 120           # wake-up: nível alto antes do FE (fonte pública)
+janela_wake_s = 1.0           # tempo que o pulso vale para aceitar o FE 04 72 8C
+intervalo_quadro_ms = 10      # silêncio maior que isso descarta quadro incompleto (1 byte = 0,96 ms)
+
+[tabelas."0x00"]              # identificação da ECU
+status = "HIPOTESE"
+tamanho = 4
+fixo = "EC 01 93 00"
+
+[tabelas."0x11"]              # tamanho 20 decorre do "02 19 ..." (25 bytes) da fonte pública
+status = "HIPOTESE"
+tamanho = 20
+
+[tabelas."0x13"]
+status = "HIPOTESE"
+tamanho = 16
+
+[tabelas."0x17"]
+status = "HIPOTESE"
+tamanho = 16
+
+[sensores.rpm]
+status = "HIPOTESE"
+tabela = 0x11
+offset = 0
+bytes = 2
+conversao = "inverso"
+k = 1875000
+unidade = "rpm"
+min = 0
+max = 9000
+
+[sensores.ect]
+status = "HIPOTESE"
+tabela = 0x11
+offset = 2
+bytes = 1
+conversao = "linear"
+escala = 1.0
+soma = -40.0
+unidade = "°C"
+min = -40
+max = 140
+
+[sensores.iat]
+status = "HIPOTESE"
+tabela = 0x11
+offset = 3
+bytes = 1
+conversao = "linear"
+escala = 1.0
+soma = -40.0
+unidade = "°C"
+min = -40
+max = 100
+
+[sensores.map]
+status = "HIPOTESE"
+tabela = 0x11
+offset = 4
+bytes = 1
+conversao = "linear"
+escala = 0.5
+soma = 0.0
+unidade = "kPa"
+min = 0
+max = 110
+
+[sensores.tps]
+status = "HIPOTESE"
+tabela = 0x11
+offset = 5
+bytes = 1
+conversao = "linear"
+escala = 0.392156862745098   # 100/255
+soma = 0.0
+unidade = "%"
+min = 0
+max = 100
+
+[sensores.o2]
+status = "HIPOTESE"
+tabela = 0x11
+offset = 6
+bytes = 1
+conversao = "linear"
+escala = 0.01953125          # 5/256
+soma = 0.0
+unidade = "V"
+min = 0
+max = 1.1
+
+[sensores.vss]
+status = "HIPOTESE"
+tabela = 0x11
+offset = 7
+bytes = 1
+conversao = "linear"
+escala = 1.0
+soma = 0.0
+unidade = "km/h"
+min = 0
+max = 220
+
+[sensores.avanco]
+status = "HIPOTESE"
+tabela = 0x11
+offset = 8
+bytes = 1
+conversao = "linear"
+escala = 0.5
+soma = -64.0
+unidade = "°"
+min = -10
+max = 50
+
+[sensores.tensao]
+status = "HIPOTESE"
+tabela = 0x11
+offset = 9
+bytes = 1
+conversao = "linear"
+escala = 0.1
+soma = 0.0
+unidade = "V"
+min = 0
+max = 18
