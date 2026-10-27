@@ -122,7 +122,8 @@ def test_replay_devolve_quadros_gravados(tmp_path, mapa):
     fonte = FonteReplay(arq)
     assert fonte.tabela(0x11, 0.4) == q1[4:-1]
     assert fonte.tabela(0x11, 1.2) == q2[4:-1]
-    assert fonte.tabela(0x11, 3.2) == q2[4:-1]  # laço: 3.2 % 2.0 = 1.2
+    assert fonte.tabela(0x11, 2.5) == q1[4:-1]  # última amostra também sai
+    assert fonte.tabela(0x11, 4.2) == q2[4:-1]  # laço de 3 s: 4.2 % 3.0 = 1.2
     assert fonte.tabela(0x13, 1.0) is None
     e = EcuVirtual(fonte, mapa.tempo, "kline", t0=100.0)
     t = handshake(e)

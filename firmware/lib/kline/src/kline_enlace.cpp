@@ -32,6 +32,12 @@ void Enlace::configurar(const Config& c) {
   if (cfg_.nTabelas > MAX_TABELAS) cfg_.nTabelas = MAX_TABELAS;
   memset(falhasTabela_, 0, sizeof(falhasTabela_));
   indice_ = 0;
+  if (aguardando_) {  // descarta a requisição em curso: a resposta não pertence à rodada nova
+    aguardando_ = false;
+    ecoN_ = ecoI_ = 0;
+    montador_.limpar();
+    desde_ = t_.agoraMs();
+  }
 }
 
 void Enlace::irPara(Estado e) {

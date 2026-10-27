@@ -57,3 +57,13 @@ def test_mapa_recusa_sobreposicao(tmp_path):
     arq.write_text(texto, encoding="utf-8")
     with pytest.raises(ValueError, match="disputam"):
         m.carregar(arq)
+
+
+def test_mapa_recusa_offset_negativo(tmp_path):
+    texto = m.CAMINHO_PADRAO.read_text(encoding="utf-8").replace(
+        "[sensores.iat]\nstatus = \"HIPOTESE\"\ntabela = 0x11\noffset = 3",
+        "[sensores.iat]\nstatus = \"HIPOTESE\"\ntabela = 0x11\noffset = -1")
+    arq = tmp_path / "mapa.toml"
+    arq.write_text(texto, encoding="utf-8")
+    with pytest.raises(ValueError, match="fora da tabela"):
+        m.carregar(arq)

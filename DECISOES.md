@@ -42,3 +42,11 @@ Formato: o quê · alternativa descartada · motivo. Datas em 2026.
 ## Repositório (27/10)
 
 26. **git na raiz, commits só das minhas pastas**; `.venv` ignorado em `.git/info/exclude`, `.gitignore` por pasta. · Descartado: `.gitignore` na raiz. · A raiz é compartilhada com `leitor-pisca/` (outra sessão), que fica fora dos meus commits.
+
+## Crítica do Codex (27/10) — o que ficou de fora e por quê
+
+27. **Prefixo `02 40` trava o montador até chegarem 64 bytes** (`protocolo.Montador`). · Não corrigido no montador. · Na prática quem limpa é o silêncio > 10 ms (decisão 5), no emulador e no firmware; o cliente Python lê por tamanho, não usa o montador.
+28. **Emulador aceita requisição enquanto ainda "transmite" a resposta** (colisão na linha de 1 fio). · Não modelado. · Comportamento da ECU real em colisão é desconhecido; todos os testadores daqui esperam a resposta antes de enviar. HIPÓTESE.
+29. **O pulso de 70 ms em nível baixo só é provado no teste com ECU falsa** (instantes de linhaBaixa/linhaLiberada/primeira escrita); o teste contra o emulador não vê nível elétrico. · Sem saída em software: osciloscópio/carro.
+30. **Teste de replay compara conjunto, não sequência**. · Mantido. · A sequência depende do relógio real do socket; o teste unitário de `FonteReplay` confere instantes exatos.
+Descartado como falso: "teste de sobreposição do mapa nunca levanta" — o teste passa com `pytest.raises` (o Codex leu os `\n` do diff como literais).

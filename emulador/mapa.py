@@ -110,7 +110,7 @@ def validar(mapa: Mapa) -> None:
         t = mapa.tabelas.get(s.tabela)
         if t is None:
             raise ValueError(f"{s.nome}: tabela {s.tabela:02X} não declarada")
-        if t.fixo is not None or s.offset + s.bytes > t.tamanho:
+        if t.fixo is not None or s.offset < 0 or s.offset + s.bytes > t.tamanho:
             raise ValueError(f"{s.nome}: offset {s.offset} fora da tabela {s.tabela:02X}")
         for b in range(s.offset, s.offset + s.bytes):
             if (s.tabela, b) in ocupado:

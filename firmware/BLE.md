@@ -4,7 +4,7 @@ O firmware não decodifica sensores: repassa o quadro cru de cada tabela. A conv
 (offset, fórmula) mora no app/painel, lida de `emulador/mapa_ecu.toml`, para que trocar
 o mapa depois do log real do carro não exija regravar o ESP32.
 
-Nome anunciado: `KLink-BR`. Tudo little-endian. Byte 0 de todo payload = versão do formato (`0x01`).
+Nome anunciado: `KLink-BR`. Campos do envelope BLE (ms, contadores, intervalo) são little-endian; os bytes do quadro cru seguem a ordem da ECU, definida em `mapa_ecu.toml` (hoje big-endian, HIPÓTESE). Byte 0 de todo payload = versão do formato (`0x01`).
 
 | Característica | UUID | Propriedades |
 |---|---|---|

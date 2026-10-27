@@ -103,7 +103,8 @@ def main(argv=None) -> int:
                         resp = exchange(ser, request(t))
                         out.writerow([f"{time.time() - t0:.3f}", f"{t:02X}", resp.hex()])
                         print(f"{t:02X}: {resp.hex(' ')}")
-                        if not resp and not wake_and_init(ser):
+                        valid = len(resp) >= 3 and len(resp) == resp[1] and not sum(resp) & 0xFF
+                        if not valid and not wake_and_init(ser):
                             print("perdeu a ECU")
                             return 1
                     f.flush()

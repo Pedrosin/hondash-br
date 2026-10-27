@@ -21,7 +21,9 @@ struct EcuFalsa : public Transporte {
   int trocaTabela = -1;       // responde essa tabela no lugar da pedida
   std::set<uint8_t> semResposta;
 
+  uint32_t msBaixa = 0, msLiberada = 0, msPrimeiraEscrita = 0;
   void escrever(const uint8_t* d, size_t n) override {
+    if (tx.empty()) msPrimeiraEscrita = ms;
     tx.insert(tx.end(), d, d + n);
     if (ecoNaLinha) rx.insert(rx.end(), d, d + n);
     if (muda) return;
@@ -30,7 +32,8 @@ struct EcuFalsa : public Transporte {
       rx.insert(rx.end(), WAKE_OK, WAKE_OK + sizeof(WAKE_OK));
     } else if (acordada && iguais(d, n, INIT, sizeof(INIT))) {
       rx.insert(rx.end(), INIT_OK, INIT_OK + sizeof(INIT_OK));
-    } else if (acordada && n == 5 && d[2] == CONSULTA_TABELA && !semResposta.count(d[3])) {
+    } else if (acordada && n == 5 && quadroValido(d, n) && d[0] == TIPO_REQ && d[2] == CONSULTA_TABELA &&
+               !semResposta.count(d[3])) {
       responder(trocaTabela >= 0 ? (uint8_t)trocaTabela : d[3]);
     }
   }
@@ -49,8 +52,12 @@ struct EcuFalsa : public Transporte {
   void linhaBaixa() override {
     pulsos++;
     baixa = true;
+    msBaixa = ms;
   }
-  void linhaLiberada() override { baixa = false; }
+  void linhaLiberada() override {
+    baixa = false;
+    msLiberada = ms;
+  }
   void uartPronta() override {}
   uint32_t agoraMs() override { return ms; }
 };
@@ -81,6 +88,8 @@ static void test_handshake_e_rodada_de_tabelas() {
   rodar(e, f, 200);
   TEST_ASSERT_EQUAL(ATIVO, e.estado());
   TEST_ASSERT_EQUAL(1, f.pulsos);
+  TEST_ASSERT_TRUE(f.msLiberada - f.msBaixa >= PULSO_BAIXO_MS);
+  TEST_ASSERT_TRUE(f.msPrimeiraEscrita - f.msLiberada >= PULSO_ALTO_MS);
   TEST_ASSERT_EQUAL_HEX8_ARRAY(WAKE, f.tx.data(), 4);
   TEST_ASSERT_EQUAL_HEX8_ARRAY(INIT, f.tx.data() + 4, 5);
   TEST_ASSERT_TRUE(recebidas.size() >= 6);

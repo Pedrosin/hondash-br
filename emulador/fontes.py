@@ -25,7 +25,8 @@ class FonteReplay:
     """Repete um log no formato do kline_probe.py (t_s, tabela, bytes_hex).
 
     bytes_hex é o quadro de resposta inteiro; linhas com quadro inválido ou vazio
-    são ignoradas. No instante t devolve o último quadro gravado até t, em laço.
+    são ignoradas. No instante t devolve o último quadro gravado até t, em laço
+    (antes da primeira amostra, devolve a primeira).
     """
 
     def __init__(self, caminho: str | Path) -> None:
@@ -41,7 +42,10 @@ class FonteReplay:
                 dados.append(r[1])
         if not self.series:
             raise ValueError(f"{caminho}: nenhum quadro de tabela válido")
-        self.duracao = max(ts[-1] for ts, _ in self.series.values()) or 1.0
+        # o ciclo termina um passo depois da última amostra, para ela também ser reproduzida
+        ultimo = max(ts[-1] for ts, _ in self.series.values())
+        passo = max((ts[-1] - ts[-2] for ts, _ in self.series.values() if len(ts) > 1), default=1.0)
+        self.duracao = ultimo + (passo or 1.0)
 
     def tabela(self, tid: int, t: float) -> bytes | None:
         serie = self.series.get(tid)

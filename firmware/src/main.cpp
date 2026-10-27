@@ -46,7 +46,7 @@ BLECharacteristic* chConfig = nullptr;
 volatile bool conectado = false;
 
 portMUX_TYPE trava = portMUX_INITIALIZER_UNLOCKED;
-kline::Config cfgPendente;
+kline::Config cfgPendente = kline::Config::padrao();  // última config aceita; protegida por trava
 bool temCfgPendente = false;
 
 void publicarConfig(const kline::Config& c) {
@@ -66,7 +66,9 @@ class CbServidor : public BLEServerCallbacks {
 class CbConfig : public BLECharacteristicCallbacks {
   void onWrite(BLECharacteristic* c) override {
     auto v = c->getValue();  // std::string no core 2.x, String no 3.x: as duas têm c_str()/length()
-    kline::Config nova = enlace.config();
+    portENTER_CRITICAL(&trava);
+    kline::Config nova = cfgPendente;  // nunca lê o enlace, que é do loop()
+    portEXIT_CRITICAL(&trava);
     if (!ble::decodificarConfig(reinterpret_cast<const uint8_t*>(v.c_str()), v.length(), nova)) return;
     portENTER_CRITICAL(&trava);
     cfgPendente = nova;

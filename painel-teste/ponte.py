@@ -59,7 +59,8 @@ class LeitorKLine(threading.Thread):
         t0 = time.monotonic()
         while not self.parar.is_set():
             try:
-                ser = serial.serial_for_url(self.url, 115200, timeout=0.4)
+                baud = 115200 if self.modo == "ponte" else 10400  # USB do Nano x linha K direta
+                ser = serial.serial_for_url(self.url, baud, timeout=0.4)
             except (serial.SerialException, OSError) as e:
                 self.estado("erro", str(e))
                 self.parar.wait(1.0)
